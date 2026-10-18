@@ -903,10 +903,15 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
 
     private void drawArc(Canvas canvas, RectF oval, float startAngle, float sweepAngle, boolean useCenter, Paint paint) {
         boolean isForum = ChatObject.isForum(UserConfig.selectedAccount, dialogId);
-        if (isForum) {
-            float r = oval.height() * 0.32f;
+        int corners = NaConfig.INSTANCE.getAvatarCorners().Int();
+        if (isForum || corners < 100) {
+            float r = corners < 100 ? (oval.height() / 2f) * (corners / 100.0f) : oval.height() * 0.32f;
             if (Math.abs(sweepAngle) == 360) {
-                canvas.drawRoundRect(oval, r, r, paint);
+                if (r == 0) {
+                    canvas.drawRect(oval, paint);
+                } else {
+                    canvas.drawRoundRect(oval, r, r, paint);
+                }
                 return;
             }
             startAngle = startAngle + sweepAngle;
@@ -917,7 +922,11 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
             float percentFrom = (startAngle - pathAngleStart) / 360;
             float percentTo = (endAngle - pathAngleStart) / 360;
             forumRoundRectPath.rewind();
-            forumRoundRectPath.addRoundRect(oval, r, r, Path.Direction.CW);
+            if (r == 0) {
+                forumRoundRectPath.addRect(oval, Path.Direction.CW);
+            } else {
+                forumRoundRectPath.addRoundRect(oval, r, r, Path.Direction.CW);
+            }
             forumRoundRectMatrix.reset();
             forumRoundRectMatrix.postRotate(rotateAngle, oval.centerX(), oval.centerY());
             forumRoundRectPath.transform(forumRoundRectMatrix);
@@ -935,7 +944,7 @@ public class ProfileStoriesView extends View implements NotificationCenter.Notif
     }
 
     private void drawArcs(Canvas canvas, StoryCircle A, StoryCircle B, StoryCircle C, Paint paint) {
-        if (NaConfig.INSTANCE.getShowSquareAvatar().Bool()) {
+        if (NaConfig.INSTANCE.getAvatarCorners().Int() != 100) {
             return;
         }
 

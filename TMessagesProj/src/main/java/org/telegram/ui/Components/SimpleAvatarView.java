@@ -67,18 +67,38 @@ public class SimpleAvatarView extends View {
 
         canvas.save();
         float scale = 0.9f + selectProgress * 0.1f;
-        canvas.scale(scale, scale);
+        int corners = NaConfig.INSTANCE.getAvatarCorners().Int();
+        if (corners < 100) {
+            canvas.scale(scale, scale, getWidth() / 2f, getHeight() / 2f);
+        } else {
+            canvas.scale(scale, scale);
+        }
         selectPaint.setColor(Theme.getColor(Theme.key_dialogTextBlue));
         selectPaint.setAlpha((int) (Color.alpha(selectPaint.getColor()) * selectProgress));
         float stroke = selectPaint.getStrokeWidth();
         AndroidUtilities.rectTmp.set(stroke, stroke, getWidth() - stroke, getHeight() - stroke);
-        if (NaConfig.INSTANCE.getShowSquareAvatar().Bool()) {
+        if (corners == 0) {
             final float w = selectPaint.getStrokeWidth();
             canvas.drawRect(w, w, getWidth() - w, getHeight() - w, selectPaint);
+        } else if (corners < 100) {
+            float rad = (Math.min(getWidth(), getHeight()) / 2f) * (corners / 100.0f);
+            canvas.drawRoundRect(AndroidUtilities.rectTmp, rad, rad, selectPaint);
         } else {
             canvas.drawArc(AndroidUtilities.rectTmp, -90, selectProgress * 360, false, selectPaint);
         }
         canvas.restore();
+
+        if (avatarImage != null) {
+            float pad = !isAvatarHidden ? selectPaint.getStrokeWidth() * 2.5f * selectProgress : 0;
+            int size = Math.max(0, Math.min(getWidth() - Math.round(pad * 2), getHeight() - Math.round(pad * 2)));
+            if (size > 0) {
+                if (corners == 0) {
+                    avatarImage.setRoundRadius(0);
+                } else if (corners < 100) {
+                    avatarImage.setRoundRadius(size / 2);
+                }
+            }
+        }
 
         if (!isAvatarHidden) {
             float pad = selectPaint.getStrokeWidth() * 2.5f * selectProgress;
