@@ -1497,6 +1497,12 @@ object NaConfig {
             ConfigItem.configTypeInt,
             0
         )
+    val customAppName =
+        addConfig(
+            "CustomAppName",
+            ConfigItem.configTypeString,
+            "Nagram"
+        )
 
     private fun addConfig(
         k: String,
